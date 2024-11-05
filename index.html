@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Rotating Donut</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #000;
+            color: #fff;
+            font-family: monospace;
+        }
+
+        #canvasdonut {
+            border: 1px solid white;
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <pre id="output"></pre>
+    <canvas id="canvasdonut" width="320" height="240"></canvas>
+
+    <script>
+        (function () {
+            var init = function () {
+                var asciiOutput = document.getElementById('output');
+                var canvasElement = document.getElementById('canvasdonut');
+
+                var timer = undefined;
+                var angleA = 1, angleB = 1;
+
+                var generateFrame = function () {
+                    var buffer = [];
+                    var depth = [];
+                    angleA += 0.07;
+                    angleB += 0.03;
+                    var cosA = Math.cos(angleA), sinA = Math.sin(angleA),
+                        cosB = Math.cos(angleB), sinB = Math.sin(angleB);
+                    for (var index = 0; index < 1760; index++) {
+                        buffer[index] = index % 80 == 79 ? "\n" : " ";
+                        depth[index] = 0;
+                    }
+                    for (var theta = 0; theta < 6.28; theta += 0.07) {
+                        var cosTheta = Math.cos(theta), sinTheta = Math.sin(theta);
+                        for (phi = 0; phi < 6.28; phi += 0.02) {
+                            var sinPhi = Math.sin(phi), cosPhi = Math.cos(phi),
+                                circleOffset = cosTheta + 2,
+                                distance = 1 / (sinPhi * circleOffset * sinA + sinTheta * cosA + 5),
+                                adjustedX = sinPhi * circleOffset * cosA - sinTheta * sinA;
+
+                            var xPos = 0 | (40 + 30 * distance * (cosPhi * circleOffset * cosB - adjustedX * sinB)),
+                                yPos = 0 | (12 + 15 * distance * (cosPhi * circleOffset * sinB + adjustedX * cosB)),
+                                pixelIndex = xPos + 80 * yPos,
+                                luminanceIndex = 0 | (8 * ((sinTheta * sinA - sinPhi * cosTheta * cosA) * cosB - sinPhi * cosTheta * sinA - sinTheta * cosA - cosPhi * cosTheta * sinB));
+                            if (yPos < 22 && yPos >= 0 && xPos >= 0 && xPos < 79 && distance > depth[pixelIndex]) {
+                                depth[pixelIndex] = distance;
+                                buffer[pixelIndex] = "KRUTHIA@NAGRJU"[luminanceIndex > 0 ? luminanceIndex : 0];
+                            }
+                        }
+                    }
+                    asciiOutput.innerHTML = buffer.join("");
+                };
+
+                var startAnimation = function () {
+                    if (timer === undefined) {
+                        timer = setInterval(generateFrame, 50);
+                    } else {
+                        clearInterval(timer);
+                        timer = undefined;
+                    }
+                };
+
+                generateFrame();
+                startAnimation();
+            }
+
+            window.addEventListener("load", init, false);
+        })();
+    </script>
+</body>
+
+</html>
